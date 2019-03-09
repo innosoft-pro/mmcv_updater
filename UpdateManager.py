@@ -6,6 +6,8 @@ class UpdateManager:
     def input_updated(self, device_input):
         print("Input updated!")
         image = device_input.find_image()
+        image.install()
+        image.run()
         pass
 
     def add_input(self, device_input):

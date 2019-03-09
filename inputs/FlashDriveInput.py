@@ -1,6 +1,5 @@
 import pyudev
-import docker
-import docker.errors
+from images.DockerImage import DockerImage
 # TODO : subprocess should REALLY be sandboxed or changed to something different
 from subprocess import Popen, PIPE
 import re
@@ -27,21 +26,12 @@ class FlashDriveInput:
         self.observer = pyudev.MonitorObserver(self.monitor, self.poll)
         self.observer.start()
 
-        self.docker = docker.from_env()
-
         self.device_path = ""
 
     def find_image(self):
         # TODO: add actual image detection
-        contents = ""
-        with open(f"{self.device_path}/hello_world.img", "rb") as image_data:
-            contents = image_data.read()
-        image = None
-        try:
-            image = self.docker.images.load(contents)
-        except docker.errors.APIError as e:
-            pass
-        return image[0]
+        ret = DockerImage(self.device_path, "hello_world.img")
+        return ret
 
     def start_polling(self):
         pass
