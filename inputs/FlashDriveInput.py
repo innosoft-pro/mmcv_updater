@@ -17,12 +17,15 @@ class FlashDriveInput:
     def __init__(self, update_manager):
         self.update_manager = update_manager
 
+        # Load the pyudev context, monitor and observer.
         self.context = pyudev.Context()
         self.monitor = pyudev.Monitor.from_netlink(self.context)
         # TODO : Not sure this is always correct. This checks for new PARTITIONS, not just USBs
         # I am checking for USB later, though
         self.monitor.filter_by(subsystem='block', device_type='partition')
 
+        # MonitorObserver is asynchronous, self.poll used as a callback function
+        # TODO : poll() is supposed to be a private function. Still, should it be reused like this?
         self.observer = pyudev.MonitorObserver(self.monitor, self.poll)
         self.observer.start()
 
@@ -34,6 +37,7 @@ class FlashDriveInput:
         return ret
 
     def start_polling(self):
+        # NOTE: Not supposed to do anything. Monitoring is not polled, but kinda event-driven
         pass
 
     def notify(self):

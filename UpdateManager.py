@@ -4,6 +4,7 @@ class UpdateManager:
         self.inputs = list()
 
     def input_updated(self, device_input):
+        # TODO: Probably check that the caller is in our inputs list
         print("Input updated!")
         image = device_input.find_image()
         self.update(image)
@@ -13,5 +14,7 @@ class UpdateManager:
         self.inputs.append(device_input)
 
     def update(self, image):
+        # TODO : Add proper error handling
+        # TODO : Add memory size checking
         image.install()
         image.run()
