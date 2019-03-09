@@ -6,12 +6,12 @@ class UpdateManager:
     def input_updated(self, device_input):
         print("Input updated!")
         image = device_input.find_image()
-        image.install()
-        image.run()
+        self.update(image)
         pass
 
     def add_input(self, device_input):
         self.inputs.append(device_input)
 
     def update(self, image):
-        pass
+        image.install()
+        image.run()
