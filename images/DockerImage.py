@@ -15,7 +15,8 @@ class DockerImage:
         # TODO : add error handling here
         # docker.load requires the binary contents of a tarball with the image data
         with open(f"{self.image_file_path}/{self.image_file_name}", "rb") as image_file:
-            self.image = self.docker.images.load(image_file.read())
+            contents = image_file.read()
+            self.image = self.docker.images.load(contents)
         return True
 
     def delete(self):
