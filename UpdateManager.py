@@ -5,7 +5,6 @@ class UpdateManager:
 
     def input_updated(self, device_input):
         # TODO: Probably check that the caller is in our inputs list
-        print("Input updated!")
         image = device_input.find_image()
         self.update(image)
         pass
@@ -18,3 +17,9 @@ class UpdateManager:
         # TODO : Add memory size checking
         image.install()
         image.run()
+
+    # Docker memory size usage:
+    # docker image inspect [name] --format='{{.Size}}'
+    # docker ps -s --all
+    # Readable layers are the same size between different containers (virtual size)
+    # Writable layers are per container
