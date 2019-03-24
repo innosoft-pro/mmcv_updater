@@ -1,15 +1,35 @@
+import math
+import os
+
 import docker
 
 
 class DockerImage:
-    def __init__(self, image_file_path, image_file_name):
-        self.image_file_path = image_file_path
-        self.image_file_name = image_file_name
+    def __init__(self, container_id=None):
+        self.image_file_path = None
+        self.image_file_name = None
 
         self.docker = docker.from_env()
 
         self.image = None
         self.container = None
+
+        images = self.docker.containers.list(filters=dict(id=container_id))
+        self.image_size = math.inf
+        # Something went really wrong if there are more than 1 container with the same id
+        if len(images) == 1:
+            self.container = images[0]
+            self.image = self.container.image
+
+    def from_file(self, image_file_path, image_file_name):
+        self.image_file_path = image_file_path
+        self.image_file_name = image_file_name
+
+        # Docker image size is difficult to completely calculate with the tools provided by Docker itself.
+        # Instead, the tar's size is taken as an approximation
+        # Based on very few samples, this approximation can vary from 20% increase to 80%
+        # Write-layer is not calculated either way, so this part can actually help a bit
+        self.image_size = os.stat(self.image_file_path + "/" + self.image_file_name).st_size
 
     def install(self):
         # TODO : add error handling here

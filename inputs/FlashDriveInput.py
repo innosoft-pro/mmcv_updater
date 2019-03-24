@@ -1,3 +1,7 @@
+import os
+
+from Config import Config
+
 import pyudev
 from images.DockerImage import DockerImage
 # TODO : subprocess should REALLY be sandboxed or changed to something different
@@ -32,8 +36,33 @@ class FlashDriveInput:
         self.device_path = ""
 
     def find_image(self):
-        # TODO: add actual image detection
-        ret = DockerImage(self.device_path, "hello_world.img")
+        usb_files = os.listdir(self.device_path)
+        ret = None
+        for file in usb_files:
+            match = re.search(r"mmcv_(core|incidents|trucks)_(x86|rpi)-(\d+)\.(\d+)\.(\d+)\.tar", file)
+            if match is not None:
+                # TODO: check that the update is compatible by architecture.
+                up_major = match.group(3)
+                up_minor = match.group(4)
+                up_patch = match.group(5)
+
+                cur_version = Config().get_parser()["common"]["current_version"]
+                version = re.search(r"(\d+)\.(\d+)\.(\d+)", cur_version)
+
+                cur_major = version.group(1)
+                cur_minor = version.group(2)
+                cur_patch = version.group(3)
+
+                # NOTE: This way seems to be the most reliable?
+                if up_major <= cur_major:
+                    if up_minor <= cur_minor:
+                        if up_patch <= cur_patch:
+                            continue
+
+                ret = DockerImage()
+                ret.from_file(self.device_path, file)
+                break
+                
         return ret
 
     def start_polling(self):
@@ -60,4 +89,3 @@ class FlashDriveInput:
                     self.notify()
             elif action == 'remove':
                 pass
-
