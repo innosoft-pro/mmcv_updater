@@ -3,6 +3,7 @@ from Singleton import Singleton
 import configparser
 
 
+# TODO: Make static
 class Config(metaclass=Singleton):
     file_name = "update_config.ini"
     __parser = configparser.ConfigParser(default_section="common")

@@ -3,6 +3,7 @@ from Config import Config
 from images.DockerImage import DockerImage
 
 
+# TODO: Make static
 class UpdateManager:
 
     def __init__(self):
@@ -42,7 +43,7 @@ class UpdateManager:
         image.run()
 
         # Save the info for later
-        version_string = str(image.version["major"]) + str(image.version["minor"]) + str(image.version["patch"])
+        version_string = f"{image.version['major']}.{image.version['minor']}.{image.version['patch']}"
         Config().write("common", "current_version", version_string)
         Config().write("common", "current_image", image.image_type)
         image.save_info()
