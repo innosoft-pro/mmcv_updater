@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="page">
+<head>
+    <title>Configurator</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Project's styles -->
+    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+</head>
+
+<body class="page__body">
+<header id="header" class="clearfix ">
+    <div class="ant-row" style="height: 70px;line-height: 70px">
+        <div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-6 ant-col-lg-4">
+              <span class="logo">
+                <a class="ant-anchor-link" href="/configurator">
+                    Configurator
+                </a>
+              </span>
+        </div>
+    </div>
+</header>
+<div class="container content main-wrapper">
+    <div id="root"></div>
+
+</div>
+<script src="{{ url_for('static', filename='bundle.js') }}"></script>
+</body>
+
+</html>

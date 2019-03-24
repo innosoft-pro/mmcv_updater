@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+.idea/
+frontend/node_modules/
+frontend/package-lock.json
+static/main.css
+static/bundle.js
+static/images/*.png
