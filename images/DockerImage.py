@@ -59,7 +59,7 @@ class DockerImage:
         # Only run 1 copy of the image, I assume?
         # TODO : error retrieval and user notification
         if self.container is None:
-            self.container = self.docker.containers.run(self.image[0].tags[0])
+            self.container = self.docker.containers.run(self.image[0].tags[0], detach=True)
 
     def stop(self):
         if self.container is not None:
