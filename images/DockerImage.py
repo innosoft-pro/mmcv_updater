@@ -3,6 +3,8 @@ import os
 
 import docker
 
+from Config import Config
+
 
 class DockerImage:
     def __init__(self, container_id=None):
@@ -14,6 +16,10 @@ class DockerImage:
         self.image = None
         self.container = None
 
+        self.version = dict(major=0, minor=0, patch=0)
+
+        self.image_type = "docker"
+
         images = self.docker.containers.list(filters=dict(id=container_id))
         self.image_size = math.inf
         # Something went really wrong if there are more than 1 container with the same id
@@ -21,7 +27,7 @@ class DockerImage:
             self.container = images[0]
             self.image = self.container.image
 
-    def from_file(self, image_file_path, image_file_name):
+    def from_file(self, image_file_path, image_file_name, major, minor, patch):
         self.image_file_path = image_file_path
         self.image_file_name = image_file_name
 
@@ -30,6 +36,10 @@ class DockerImage:
         # Based on very few samples, this approximation can vary from 20% increase to 80%
         # Write-layer is not calculated either way, so this part can actually help a bit
         self.image_size = os.stat(self.image_file_path + "/" + self.image_file_name).st_size
+
+        self.version["major"] = major
+        self.version["minor"] = minor
+        self.version["patch"] = patch
 
     def install(self):
         # TODO : add error handling here
@@ -55,3 +65,6 @@ class DockerImage:
         if self.container is not None:
             self.container.stop()
             self.container = None
+
+    def save_info(self):
+        Config().write("docker", "current_container", self.container.id)

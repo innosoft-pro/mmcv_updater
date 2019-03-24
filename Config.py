@@ -10,9 +10,9 @@ class Config(metaclass=Singleton):
 
     def write(self, section, key, value):
         if section not in self.__parser:
-            return False
-        self.__parser[section][key] = value
-        with open(self.file_name, "r") as file:
+            self.__parser.add_section(section)
+        self.__parser.set(section, key, value)
+        with open(self.file_name, "w") as file:
             self.__parser.write(file)
         return True
 

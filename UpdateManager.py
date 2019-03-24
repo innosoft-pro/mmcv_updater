@@ -41,6 +41,12 @@ class UpdateManager:
         image.install()
         image.run()
 
+        # Save the info for later
+        version_string = str(image.version["major"]) + str(image.version["minor"]) + str(image.version["patch"])
+        Config().write("common", "current_version", version_string)
+        Config().write("common", "current_image", image.image_type)
+        image.save_info()
+
     def error_notification(self, error):
         # TODO: more detailed error notification, integrate with the system itself
         print(error)

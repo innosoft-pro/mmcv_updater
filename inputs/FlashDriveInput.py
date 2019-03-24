@@ -60,9 +60,9 @@ class FlashDriveInput:
                             continue
 
                 ret = DockerImage()
-                ret.from_file(self.device_path, file)
+                ret.from_file(self.device_path, file, up_major, up_minor, up_patch)
                 break
-                
+
         return ret
 
     def start_polling(self):
