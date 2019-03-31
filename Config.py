@@ -1,14 +1,12 @@
-from Singleton import Singleton
-
 import configparser
 
 
-# TODO: Make static
-class Config(metaclass=Singleton):
+class Config():
     file_name = "update_config.ini"
-    __parser = configparser.ConfigParser(default_section="common")
-    __parser.read(file_name)
+    parser = configparser.ConfigParser(default_section="common")
+    parser.read(file_name)
 
+    @staticmethod
     def write(self, section, key, value):
         if section not in self.__parser:
             self.__parser.add_section(section)
@@ -16,7 +14,3 @@ class Config(metaclass=Singleton):
         with open(self.file_name, "w") as file:
             self.__parser.write(file)
         return True
-
-    # Just a quick way to read the config data
-    def get_parser(self):
-        return self.__parser

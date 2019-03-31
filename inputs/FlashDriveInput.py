@@ -10,11 +10,11 @@ import re
 
 
 class FlashDriveInput:
-    '''
+    """
 
     Monitors Linux udev for usb insertion/deletion
 
-    '''
+    """
 
     # TODO: move system-dependent code outside, to make sure we can use the code anywhere
 
@@ -24,8 +24,8 @@ class FlashDriveInput:
         # Load the pyudev context, monitor and observer.
         self.context = pyudev.Context()
         self.monitor = pyudev.Monitor.from_netlink(self.context)
-        # TODO : Not sure this is always correct. This checks for new PARTITIONS, not just USBs
-        # I am checking for USB later, though
+        # NOTE: This part check for added partitions, we check that the partition came from usb subsystem
+        # In case anything breaks, this might be the cause
         self.monitor.filter_by(subsystem='block', device_type='partition')
 
         # MonitorObserver is asynchronous, self.poll used as a callback function
@@ -37,36 +37,29 @@ class FlashDriveInput:
 
     def find_image(self):
         usb_files = os.listdir(self.device_path)
-        ret = None
+        image = None
+
+        version = re.search(r"(\d+)\.(\d+)\.(\d+)", Config.parser["common"]["current_version"])
+        cur_major = version.group(1)
+        cur_minor = version.group(2)
+        cur_patch = version.group(3)
+
         for file in usb_files:
-            match = re.search(r"mmcv_(core|incidents|trucks)_(x86|rpi)-(\d+)\.(\d+)\.(\d+)\.tar", file)
-            if match is not None:
-                # TODO: check that the update is compatible by architecture.
-                up_major = match.group(3)
-                up_minor = match.group(4)
-                up_patch = match.group(5)
-
-                cur_version = Config().get_parser()["common"]["current_version"]
-                version = re.search(r"(\d+)\.(\d+)\.(\d+)", cur_version)
-
-                cur_major = version.group(1)
-                cur_minor = version.group(2)
-                cur_patch = version.group(3)
-
-                # NOTE: This way seems to be the most reliable?
-                if up_major <= cur_major:
-                    if up_minor <= cur_minor:
-                        if up_patch <= cur_patch:
+            # TODO: list of all image files, to ask every version if the image was found
+            image = DockerImage.get_image(self.device_path, file)
+            if image is not None:
+                # Seems to be the most reliably way?
+                if image.version['major'] <= cur_major:
+                    if image.version['minor'] <= cur_minor:
+                        if image.version['patch'] <= cur_patch:
                             continue
-
-                ret = DockerImage()
-                ret.from_file(self.device_path, file, up_major, up_minor, up_patch)
                 break
 
-        return ret
+        return image
 
     def start_polling(self):
-        # NOTE: Not supposed to do anything. Monitoring is not polled, but kinda event-driven
+        # NOTE: Not supposed to do anything. Monitoring is not polled, but is event-driven
+        # TODO: pyudev might run off desktop environment event or something like that? Check that for headless machines
         pass
 
     def notify(self):
@@ -84,7 +77,7 @@ class FlashDriveInput:
                 if len(error) == 0:
                     # TODO: We might have a problem with punctuation or unicode somewhere here
                     mpoint = re.search(r"\S*\/media\/\S*(?:\s|$)", result)
-                    # [:-1] here to remove the dot added by the udisksctl
+                    # [:-1] here to removxe the dot added by the udisksctl
                     self.device_path = mpoint.group(0).strip()[:-1]
                     self.notify()
             elif action == 'remove':

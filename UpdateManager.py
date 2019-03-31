@@ -3,16 +3,15 @@ from Config import Config
 from images.DockerImage import DockerImage
 
 
-# TODO: Make static
 class UpdateManager:
 
     def __init__(self):
         self.inputs = list()
         self.current_image = None
-        current_image_type = (Config().get_parser())["common"]["current_image"]
+        current_image_type = Config.parser["common"]["current_image"]
 
         if current_image_type == "docker":
-            self.current_image = DockerImage(Config().get_parser()["docker"]["current_container"])
+            self.current_image = DockerImage(Config.parser["docker"]["current_container"])
 
     def input_updated(self, device_input):
         # TODO: Probably check that the caller is in our inputs list
@@ -44,8 +43,8 @@ class UpdateManager:
 
         # Save the info for later
         version_string = f"{image.version['major']}.{image.version['minor']}.{image.version['patch']}"
-        Config().write("common", "current_version", version_string)
-        Config().write("common", "current_image", image.image_type)
+        Config.write("common", "current_version", version_string)
+        Config.write("common", "current_image", image.image_type)
         image.save_info()
 
     def error_notification(self, error):
