@@ -36,11 +36,11 @@ class UpdateManager:
     def update(self, image):
         if not self.have_free_space(image.image_size):
             return self.error_notification("Not enough space to install the image")
-        self.current_image.stop()
         # Installation could unpack some files, the running might require additional space and such. Better check it
         image.install()
         if not self.have_free_space(image.image_size):
             return self.error_notification("Not enough space to run the image")
+        self.current_image.stop()
         image.run()
 
         # TODO : Add proper error handling
