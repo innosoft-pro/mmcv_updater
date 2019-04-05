@@ -26,7 +26,7 @@ class DockerImage:
 
         # Size detection
         images = self.docker.containers.list(filters=dict(id=container_id))
-        self.size = math.inf
+        self.image_size = math.inf
         # Something went really wrong if there are more than 1 container with the same id
         if len(images) == 1:
             self.container = images[0]
@@ -37,7 +37,7 @@ class DockerImage:
             for info in dockerdf:
                 # We might have a partial ID during first run
                 if container_id in info["Id"]:
-                    self.size = info["SizeRootFs"]
+                    self.image_size = info["SizeRootFs"]
 
     @staticmethod
     def from_file(image_file_path, image_file_name, major, minor, patch):
@@ -53,7 +53,7 @@ class DockerImage:
             # Instead, the tar's size is taken as an approximation
             # Based on very few samples, this approximation can vary from 20% increase to 80%
             # Write-layer is not calculated either way, so this part can actually help a bit
-            ret.size = os.stat(file_path).st_size
+            ret.image_size = os.stat(file_path).st_size
 
             ret.version["major"] = major
             ret.version["minor"] = minor
@@ -114,18 +114,19 @@ class DockerImage:
             up_patch = match.group(5)
 
             # We have a correct name, check the contents next
-            if tarfile.is_tarfile(path + filename):
-                tar = tarfile.open(filename, "r")
-
-                try:
+            try:
+                with tarfile.open(path + "/" + filename, "r") as tar:
                     # Quick check - packed docker images have a number of layers with metadata (a folder and 3 files)
                     # Also these 2 files and a description json? (Not sure, the filename is an id-named json)
                     # TODO: for added security, maybe check the presence of layer data - 1 folder, 3 files per layer.
                     tar.getmember("manifest.json")
                     tar.getmember("repositories")
-                except KeyError:
-                    # The tarfile is not a docker image, do nothing
-                    pass
-                else:
-                    image = DockerImage.from_file(path, filename, up_major, up_minor, up_patch)
+            except KeyError:
+                # The tarfile is not a docker image, do nothing
+                pass
+            except FileNotFoundError:
+                # The tarfile doesn't exist
+                pass
+            else:
+                image = DockerImage.from_file(path, filename, up_major, up_minor, up_patch)
         return image

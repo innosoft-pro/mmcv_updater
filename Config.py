@@ -6,11 +6,11 @@ class Config():
     parser = configparser.ConfigParser(default_section="common")
     parser.read(file_name)
 
-    @staticmethod
-    def write(self, section, key, value):
-        if section not in self.__parser:
-            self.__parser.add_section(section)
-        self.__parser.set(section, key, value)
-        with open(self.file_name, "w") as file:
-            self.__parser.write(file)
+    @classmethod
+    def write(cls, section, key, value):
+        if section not in cls.parser:
+            cls.parser.add_section(section)
+        cls.parser.set(section, key, value)
+        with open(cls.file_name, "w") as file:
+            cls.parser.write(file)
         return True
