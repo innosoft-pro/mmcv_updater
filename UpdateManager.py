@@ -34,12 +34,16 @@ class UpdateManager:
         return False
 
     def update(self, image):
-        # TODO : Add proper error handling
         if not self.have_free_space(image.image_size):
             return self.error_notification("Not enough space to install the image")
         self.current_image.stop()
+        # Installation could unpack some files, the running might require additional space and such. Better check it
         image.install()
+        if not self.have_free_space(image.image_size):
+            return self.error_notification("Not enough space to run the image")
         image.run()
+
+        # TODO : Add proper error handling
 
         # Save the info for later
         version_string = f"{image.version['major']}.{image.version['minor']}.{image.version['patch']}"

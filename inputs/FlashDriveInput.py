@@ -45,7 +45,6 @@ class FlashDriveInput:
         cur_patch = version.group(3)
 
         for file in usb_files:
-            # TODO: list of all image files, to ask every version if the image was found
             image = DockerImage.get_image(self.device_path, file)
             if image is not None:
                 # Seems to be the most reliably way?

@@ -24,39 +24,54 @@ class DockerImage:
         self.version = dict(major=0, minor=0, patch=0)
         self.image_type = "docker"
 
+        # Size detection
         images = self.docker.containers.list(filters=dict(id=container_id))
         self.size = math.inf
         # Something went really wrong if there are more than 1 container with the same id
         if len(images) == 1:
             self.container = images[0]
             self.image = self.container.image
+            # NOTE: df is a bit slow since it obtains ALL the resource information during the call.
+            # Runtime size is not available as a
             dockerdf = self.docker.df()["Containers"]
             for info in dockerdf:
                 # We might have a partial ID during first run
                 if container_id in info["Id"]:
                     self.size = info["SizeRootFs"]
 
-    def from_file(self, image_file_path, image_file_name, major, minor, patch):
-        self.image_file_path = image_file_path
-        self.image_file_name = image_file_name
+    @staticmethod
+    def from_file(image_file_path, image_file_name, major, minor, patch):
+        file_path = image_file_path + "/" + image_file_name
 
-        # Docker image size is difficult to completely calculate with the tools provided by Docker itself.
-        # Instead, the tar's size is taken as an approximation
-        # Based on very few samples, this approximation can vary from 20% increase to 80%
-        # Write-layer is not calculated either way, so this part can actually help a bit
-        self.size = os.stat(self.image_file_path + "/" + self.image_file_name).st_size
+        if os.path.exists(file_path):
+            ret = DockerImage()
 
-        self.version["major"] = major
-        self.version["minor"] = minor
-        self.version["patch"] = patch
+            ret.image_file_path = image_file_path
+            ret.image_file_name = image_file_name
+
+            # Docker image size is difficult to completely calculate with the tools provided by Docker itself.
+            # Instead, the tar's size is taken as an approximation
+            # Based on very few samples, this approximation can vary from 20% increase to 80%
+            # Write-layer is not calculated either way, so this part can actually help a bit
+            ret.size = os.stat(file_path).st_size
+
+            ret.version["major"] = major
+            ret.version["minor"] = minor
+            ret.version["patch"] = patch
+            return ret
+        return None
 
     def install(self):
-        # TODO : add error handling here
-        # docker.load requires the binary contents of a tarball with the image data
-        with open(f"{self.image_file_path}/{self.image_file_name}", "rb") as image_file:
-            contents = image_file.read()
-            self.image = self.docker.images.load(contents)
-        return True
+        try:
+            # docker.load requires the binary contents of a tarball with the image data
+            with open(f"{self.image_file_path}/{self.image_file_name}", "rb") as image_file:
+                contents = image_file.read()
+                self.image = self.docker.images.load(contents)
+            return True
+        except FileNotFoundError:
+            # TODO: Integrate with the runtime error notification
+            pass
+        return False
 
     def delete(self):
         if self.container is not None:
@@ -90,6 +105,10 @@ class DockerImage:
         image = None
         if match is not None:
             # TODO: also check that the update is compatible by architecture.
+            # The current problem - there are a lot of possible names that can be acquired via platform.machine()
+            # Some of them are x86, some x64, raspberry pi seem to have their own naming
+            # Index tables COULD be used, but may be a bit of a hassle to update later.
+            # As in, we'll need to update the updater.
             up_major = match.group(3)
             up_minor = match.group(4)
             up_patch = match.group(5)
@@ -101,13 +120,12 @@ class DockerImage:
                 try:
                     # Quick check - packed docker images have a number of layers with metadata (a folder and 3 files)
                     # Also these 2 files and a description json? (Not sure, the filename is an id-named json)
-                    # TODO: for added security, check the presence of layer data - 1 folder, 3 files per layer.
+                    # TODO: for added security, maybe check the presence of layer data - 1 folder, 3 files per layer.
                     tar.getmember("manifest.json")
                     tar.getmember("repositories")
                 except KeyError:
                     # The tarfile is not a docker image, do nothing
                     pass
                 else:
-                    image = DockerImage()
-                    image.from_file(path, filename, up_major, up_minor, up_patch)
+                    image = DockerImage.from_file(path, filename, up_major, up_minor, up_patch)
         return image
