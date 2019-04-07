@@ -130,3 +130,7 @@ class DockerImage:
             else:
                 image = DockerImage.from_file(path, filename, up_major, up_minor, up_patch)
         return image
+
+    def get_errors(self):
+        if self.container is not None:
+            return self.container.logs(stdout=False, stderr=True, timestamps=True)

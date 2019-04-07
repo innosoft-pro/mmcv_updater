@@ -8,6 +8,8 @@ from images.DockerImage import DockerImage
 from subprocess import Popen, PIPE
 import re
 
+import UpdateManager
+
 
 class FlashDriveInput:
     """
@@ -18,9 +20,7 @@ class FlashDriveInput:
 
     # TODO: move system-dependent code outside, to make sure we can use the code anywhere
 
-    def __init__(self, update_manager):
-        self.update_manager = update_manager
-
+    def __init__(self):
         # Load the pyudev context, monitor and observer.
         self.context = pyudev.Context()
         self.monitor = pyudev.Monitor.from_netlink(self.context)
@@ -62,7 +62,7 @@ class FlashDriveInput:
         pass
 
     def notify(self):
-        self.update_manager.input_updated(self)
+        UpdateManager.input_updated(self)
 
     def poll(self, action, device):
         # A new partition was added...
