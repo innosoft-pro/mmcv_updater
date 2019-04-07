@@ -1,5 +1,5 @@
 import os
-from Config import Config
+import Config
 from images.DockerImage import DockerImage
 
 inputs = list()
@@ -40,7 +40,7 @@ def update(image):
     image.install()
     if not have_free_space(image.image_size):
         return error_notification("Not enough space to run the image")
-        current_image.stop()
+    current_image.stop()
     image.run()
 
     # TODO : Add proper error handling

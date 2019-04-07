@@ -1,6 +1,6 @@
 import os
 
-from Config import Config
+import Config
 
 import pyudev
 from images.DockerImage import DockerImage

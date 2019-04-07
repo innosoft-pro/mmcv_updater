@@ -6,7 +6,7 @@ import tarfile
 
 import docker
 
-from Config import Config
+import Config
 
 
 class DockerImage:
