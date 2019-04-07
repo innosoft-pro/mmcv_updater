@@ -133,4 +133,12 @@ class DockerImage:
 
     def get_errors(self):
         if self.container is not None:
-            return self.container.logs(stdout=False, stderr=True, timestamps=True)
+            # 1. I output both STDOUT and STDERR because some programs may not use STDERR for errors
+            #  and STDOUT might help with providing the context for the errors
+            logs = self.container.logs(stdout=True, stderr=True)
+            if logs is None:
+                logs = "No logs yet"
+            else:
+                logs = logs.replace(b";", b"<br>")
+            return logs
+        return "No container running!"
