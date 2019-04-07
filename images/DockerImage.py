@@ -136,7 +136,7 @@ class DockerImage:
             # 1. I output both STDOUT and STDERR because some programs may not use STDERR for errors
             #  and STDOUT might help with providing the context for the errors
             logs = self.container.logs(stdout=True, stderr=True)
-            if logs is None:
+            if logs is None or len(logs) == 0:
                 logs = "No logs yet"
             else:
                 logs = logs.replace(b";", b"<br>")
