@@ -1,9 +1,7 @@
-from flask import Flask, Blueprint
+from flask import Blueprint
 
+from flask_app import app
 import UpdateManager
-
-# TODO: Proper integration
-app = Flask(__name__)
 
 error_notification = Blueprint("errors", __name__, url_prefix="/error_notification")
 
