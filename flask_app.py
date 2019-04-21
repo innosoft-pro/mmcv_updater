@@ -19,3 +19,5 @@ class StandaloneApplication(BaseApplication):
 
 # TODO: Proper integration
 app = Flask(__name__)
+
+app.config['UPLOAD_FOLDER'] = "temp_image"

@@ -39,20 +39,11 @@ class FlashDriveInput:
         usb_files = os.listdir(self.device_path)
         image = None
 
-        version = re.search(r"(\d+)\.(\d+)\.(\d+)", Config.parser["common"]["current_version"])
-        cur_major = version.group(1)
-        cur_minor = version.group(2)
-        cur_patch = version.group(3)
-
         for file in usb_files:
             image = DockerImage.get_image(self.device_path, file)
             if image is not None:
-                # Seems to be the most reliably way?
-                if image.version['major'] <= cur_major:
-                    if image.version['minor'] <= cur_minor:
-                        if image.version['patch'] <= cur_patch:
-                            continue
-                break
+                if UpdateManager.is_newer(image):
+                    break
 
         return image
 

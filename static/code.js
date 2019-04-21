@@ -35,8 +35,11 @@ function file_submitted(free_memory) {
     file = input.files[0];
     file_size.textContent = formatBytes(file.size);
 
-    // 1.5 times more as a precaution, along with a strict inequality
-    if(file.size * 1.5 < free_memory)
+    // 2,5 times more memory is asked for
+    // 1 - we need to store the image
+    // 2 - we need to install it. Current approximation - installed image is the same size as the tar (usually not)
+    // 0,5 - space for writing after the installation
+    if(file.size * 2.5 < free_memory)
     {
         enough_space.textContent = "Да";
         enough_space.style.color = 'green';

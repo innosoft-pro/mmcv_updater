@@ -1,26 +1,41 @@
+import os
 import shutil
 
 from flask_app import app
 from flask.views import MethodView
 from flask import render_template, request
-
-import humanize
+from werkzeug.utils import secure_filename
 
 import UpdateManager
+from images.DockerImage import DockerImage
 
 
 class WebInput(MethodView):
     def __init__(self):
-        pass
+        self.image_file = None
+        self.image_path = app.config['UPLOAD_FOLDER']
 
     def find_image(self):
-        pass
+        # TODO: proper image type detection
+
+        image = None
+        file_path = os.path.join(self.image_path, self.image_file)
+        if os.path.exists(file_path):
+            image = DockerImage.get_image(self.image_path, self.image_file)
+
+            if image is not None and not UpdateManager.is_newer(image):
+                image = None
+
+            # Delete the file after the search - no reason to save it
+            os.remove(file_path)
+
+        return image
 
     def start_polling(self):
         pass
 
     def notify(self):
-        pass
+        UpdateManager.input_updated(self)
 
     def poll(self):
         total, used, free = shutil.disk_usage("/")
@@ -29,6 +44,18 @@ class WebInput(MethodView):
                                current_image_size=current_image_size)
 
     def post(self):
+        if 'image' not in request.files:
+            return "No file sent!"
+
+        file = request.files['image']
+
+        self.image_file = secure_filename(file.filename)
+
+        os.makedirs(self.image_path, exist_ok=True)
+        file.save(os.path.join(self.image_path, self.image_file))
+
+        self.notify()
+
         return "Update image sent!"
 
     def get(self):

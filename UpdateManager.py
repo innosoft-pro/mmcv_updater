@@ -1,4 +1,6 @@
 import os
+import re
+
 import Config
 from images.DockerImage import DockerImage
 
@@ -6,8 +8,16 @@ inputs = list()
 current_image = None
 current_image_type = Config.parser["common"]["current_image"]
 
+current_version = {}
+
 if current_image_type == "docker":
     current_image = DockerImage(Config.parser["docker"]["current_container"])
+
+if current_image is not None:
+    version = re.search(r"(\d+)\.(\d+)\.(\d+)", Config.parser["common"]["current_version"])
+    current_version['major'] = version.group(1)
+    current_version['minor'] = version.group(2)
+    current_version['patch'] = version.group(3)
 
 
 def input_updated(device_input):
@@ -56,3 +66,32 @@ def error_notification(error):
     # TODO: more detailed error notification, integrate with the system itself
     print(error)
     return False
+
+
+def is_newer(image):
+    if image is not None:
+
+        # All parameters are smaller than the current
+        if image.version['major'] < current_version['major']:
+            if image.version['minor'] < current_version['minor']:
+                if image.version['patch'] < current_version['patch']:
+                    return False
+
+        # One of the parameters is greater
+        if image.version['major'] > current_version['major']:
+            # Newer major
+            return True
+        else:
+            # Same major
+            if image.version['minor'] > current_version['minor']:
+                # Newer minor
+                return True
+            else:
+                # Same minor
+                if image.version['patch'] > current_version['patch']:
+                    # Newer patch
+                    return True
+                else:
+                    # All parameters are the same
+                    # Reuploading images without patching could have bad consequences?
+                    return False

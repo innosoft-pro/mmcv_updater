@@ -24,20 +24,19 @@ class DockerImage:
         self.version = dict(major=0, minor=0, patch=0)
         self.image_type = "docker"
 
-        # Size detection
-        images = self.docker.containers.list(filters=dict(id=container_id))
         self.image_size = math.inf
-        # Something went really wrong if there are more than 1 container with the same id
-        if len(images) == 1:
-            self.container = images[0]
-            self.image = self.container.image
-            # NOTE: df is a bit slow since it obtains ALL the resource information during the call.
-            # Runtime size is not available as a
-            dockerdf = self.docker.df()["Containers"]
-            for info in dockerdf:
-                # We might have a partial ID during first run
-                if container_id in info["Id"]:
-                    self.image_size = info["SizeRootFs"]
+
+        if container_id is not None:
+            images = self.docker.containers.list(filters=dict(id=container_id))
+            # Something went really wrong if there are more than 1 container with the same id
+            if len(images) == 1:
+                self.container = images[0]
+                self.image = self.container.image
+                dockerdf = self.docker.df()["Containers"]
+                for info in dockerdf:
+                    # We might have a partial ID during first run
+                    if self.container.id in info["Id"]:
+                        self.image_size = info["SizeRootFs"]
 
     @staticmethod
     def from_file(image_file_path, image_file_name, major, minor, patch):
@@ -49,15 +48,15 @@ class DockerImage:
             ret.image_file_path = image_file_path
             ret.image_file_name = image_file_name
 
+            ret.version["major"] = major
+            ret.version["minor"] = minor
+            ret.version["patch"] = patch
             # Docker image size is difficult to completely calculate with the tools provided by Docker itself.
             # Instead, the tar's size is taken as an approximation
             # Based on very few samples, this approximation can vary from 20% increase to 80%
             # Write-layer is not calculated either way, so this part can actually help a bit
             ret.image_size = os.stat(file_path).st_size
 
-            ret.version["major"] = major
-            ret.version["minor"] = minor
-            ret.version["patch"] = patch
             return ret
         return None
 
