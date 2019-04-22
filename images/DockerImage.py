@@ -32,6 +32,12 @@ class DockerImage:
             if len(images) == 1:
                 self.container = images[0]
                 self.image = self.container.image
+
+                version = re.search(r"(\d+)\.(\d+)\.(\d+)", self.image.tags[0])
+                self.version['major'] = version.group(1)
+                self.version['minor'] = version.group(2)
+                self.version['patch'] = version.group(3)
+
                 dockerdf = self.docker.df()["Containers"]
                 for info in dockerdf:
                     # We might have a partial ID during first run
@@ -90,6 +96,7 @@ class DockerImage:
             self.container = None
 
     def save_info(self):
+        Config.write("common", "current_image", "docker")
         Config.write("docker", "current_container", self.container.id)
 
     @staticmethod
