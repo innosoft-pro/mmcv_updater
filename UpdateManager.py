@@ -23,7 +23,10 @@ if current_image is not None:
 def input_updated(device_input):
     # TODO: Probably check that the caller is in our inputs list
     image = device_input.find_image()
-    update(image)
+    if image is not None:
+        update(image)
+    else:
+        error_notification("No image found!")
 
 
 def add_input(device_input):
