@@ -2,6 +2,14 @@
 
 <head>
     <script type="text/javascript" src="/static/code.js"></script>
+    <script>
+        // A small thing to restore the data if the connection drops partway.
+        // Shouldn't really happen, but makes debugging the frontend a little bit more clear
+        setTimeout(function(){
+            if(document.getElementById('image').value != "")
+                file_submitted({{free_memory}});
+        }, 1000);
+    </script>
 </head>
 
 <body>
