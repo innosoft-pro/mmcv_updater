@@ -25,8 +25,16 @@ class WebInput(MethodView):
             image = DockerImage.get_image(self.image_path, self.image_file)
 
             # Found a newer image
-            if image is not None and not UpdateManager.is_newer(image):
-                image = None
+            if image is not None:
+                if UpdateManager.is_newer(image):
+                    # Problem: we can't directly delete the file that we got since it's needed for installation
+                    # Solution: install the image ourselves before removing the file
+                    # Kinda hacky fix - I still want to save up space though
+                    if not UpdateManager.have_free_space(image.image_size):
+                        return UpdateManager.error_notification("Not enough space to install the image")
+                    image.install()
+                else:
+                    image = None
 
             # Delete the file after the search - no reason to save it
             os.remove(file_path)

@@ -43,8 +43,11 @@ def update(image):
     image.install()
     if not have_free_space(image.image_size):
         return error_notification("Not enough space to run the image")
+
+    global current_image
     current_image.stop()
     image.run()
+    current_image = image
 
     # TODO : Add proper error handling
 

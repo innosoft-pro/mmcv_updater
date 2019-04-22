@@ -34,9 +34,9 @@ class DockerImage:
                 self.image = self.container.image
 
                 version = re.search(r"(\d+)\.(\d+)\.(\d+)", self.image.tags[0])
-                self.version['major'] = version.group(1)
-                self.version['minor'] = version.group(2)
-                self.version['patch'] = version.group(3)
+                self.version['major'] = int(version.group(1))
+                self.version['minor'] = int(version.group(2))
+                self.version['patch'] = int(version.group(3))
 
                 dockerdf = self.docker.df()["Containers"]
                 for info in dockerdf:
@@ -67,16 +67,18 @@ class DockerImage:
         return None
 
     def install(self):
-        try:
-            # docker.load requires the binary contents of a tarball with the image data
-            with open(f"{self.image_file_path}/{self.image_file_name}", "rb") as image_file:
-                contents = image_file.read()
-                self.image = self.docker.images.load(contents)
-            return True
-        except FileNotFoundError:
-            # TODO: Integrate with the runtime error notification
-            pass
-        return False
+        if self.image is None and self.container is None:
+            try:
+                # docker.load requires the binary contents of a tarball with the image data
+                with open(f"{self.image_file_path}/{self.image_file_name}", "rb") as image_file:
+                    contents = image_file.read()
+                    self.image = self.docker.images.load(contents)
+                return True
+            except FileNotFoundError:
+                # TODO: Integrate with the runtime error notification
+                pass
+            return False
+        return True
 
     def delete(self):
         if self.container is not None:
@@ -115,9 +117,9 @@ class DockerImage:
             # Some of them are x86, some x64, raspberry pi seem to have their own naming
             # Index tables COULD be used, but may be a bit of a hassle to update later.
             # As in, we'll need to update the updater.
-            up_major = match.group(3)
-            up_minor = match.group(4)
-            up_patch = match.group(5)
+            up_major = int(match.group(3))
+            up_minor = int(match.group(4))
+            up_patch = int(match.group(5))
 
             # We have a correct name, check the contents next
             try:
