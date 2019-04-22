@@ -17,12 +17,14 @@ class WebInput(MethodView):
 
     def find_image(self):
         # TODO: proper image type detection
+        # The idea is that there can be multiple image types. The image detection here for docker here is fine
 
         image = None
         file_path = os.path.join(self.image_path, self.image_file)
         if os.path.exists(file_path):
             image = DockerImage.get_image(self.image_path, self.image_file)
 
+            # Found a newer image
             if image is not None and not UpdateManager.is_newer(image):
                 image = None
 
