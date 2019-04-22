@@ -10,6 +10,8 @@
                 file_submitted({{free_memory}});
         }, 1000);
     </script>
+
+    <title>MMCV Загрузка Обновления</title>
 </head>
 
 <body>
@@ -33,7 +35,7 @@
         <input type="file" name="image" id="image" required="true" onchange="file_submitted({{free_memory}})">
     </p>
     <p>
-        <input type="submit" id="submit" value="Отправить" disabled="disabled">
+        <input type="submit" id="submit" value="Отправить" disabled="disabled" onClick="this.disabled=true; this.value='Отправка';">
     </p>
 </form>
 
