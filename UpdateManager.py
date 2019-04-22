@@ -1,5 +1,5 @@
 import os
-import re
+from pkg_resources import parse_version
 
 import Config
 import docker
@@ -67,30 +67,13 @@ def is_newer(image):
             # No image, so any image is newer
             return True
 
-        # All parameters are smaller than the current
-        if image.version['major'] < current_image.version['major']:
-            if image.version['minor'] < current_image.version['minor']:
-                if image.version['patch'] < current_image.version['patch']:
-                    return False
+        current_version = f"{current_image.version['major']}.{current_image.version['minor']}." \
+            f"{current_image.version['patch']}"
+        image_version = f"{image.version['major']}.{image.version['minor']}." \
+            f"{image.version['patch']}"
 
-        # One of the parameters is greater
-        if image.version['major'] > current_image.version['major']:
-            # Newer major
-            return True
-        else:
-            # Same major
-            if image.version['minor'] > current_image.version['minor']:
-                # Newer minor
-                return True
-            else:
-                # Same minor
-                if image.version['patch'] > current_image.version['patch']:
-                    # Newer patch
-                    return True
-                else:
-                    # All parameters are the same
-                    # Reuploading images without patching could have bad consequences?
-                    return False
+        return parse_version(image_version) > parse_version(current_version)
+    return False
 
 
 def save_state():
