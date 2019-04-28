@@ -1,4 +1,3 @@
-byteformat==0.2a0
 certifi==2018.11.29
 chardet==3.0.4
 Click==7.0
