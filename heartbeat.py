@@ -4,6 +4,13 @@ import requests
 
 heartbeat_unreachable = False
 
+"""
+
+Heartbeat timer for detecting if a system is down
+Unused for now
+
+"""
+
 
 class RepeatingTimer(Timer):
     def run(self):

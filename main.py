@@ -11,7 +11,3 @@ if __name__ == '__main__':
     heartbeat.start()
     app.run()
     heartbeat.cancel()
-
-    # TODO : prototype version, add proper exit condition, if any
-    # while True:
-    #    pass

@@ -12,10 +12,17 @@ from images.DockerImage import DockerImage
 
 class WebInput(MethodView):
     def __init__(self):
+        """
+        Initialize the input
+        """
         self.image_file = None
         self.image_path = app.config['UPLOAD_FOLDER']
 
     def find_image(self):
+        """
+        Try to find an image on the USB drive
+        :return: The image if any found, None if nothing is found
+        """
         # TODO: proper image type detection
         # The idea is that there can be multiple image types. The image detection here for docker here is fine
 
@@ -45,15 +52,26 @@ class WebInput(MethodView):
         pass
 
     def notify(self):
+        """
+        Notify the update manager that an image was received
+        """
         UpdateManager.input_updated(self)
 
     def poll(self):
+        """
+        Return the web interface page
+        :return: template rendering data from flask
+        """
         total, used, free = shutil.disk_usage("/")
         current_image_size = UpdateManager.current_image.image_size
         return render_template("web_input.html", free_memory=free, total_memory=total,
                                current_image_size=current_image_size)
 
     def post(self):
+        """
+        Receive the image file and save it in temporary folder
+        :return: web-page for successful image sending
+        """
         if 'image' not in request.files:
             return "No file sent!"
 

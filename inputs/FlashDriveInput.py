@@ -21,6 +21,9 @@ class FlashDriveInput:
     # TODO: move system-dependent code outside, to make sure we can use the code anywhere
 
     def __init__(self):
+        """
+        Initialize the input
+        """
         # Load the pyudev context, monitor and observer.
         self.context = pyudev.Context()
         self.monitor = pyudev.Monitor.from_netlink(self.context)
@@ -36,6 +39,10 @@ class FlashDriveInput:
         self.device_path = ""
 
     def find_image(self):
+        """
+        Try to find an image on the USB drive
+        :return: The image if any found, None if nothing is found
+        """
         usb_files = os.listdir(self.device_path)
         image = None
 
@@ -53,9 +60,17 @@ class FlashDriveInput:
         pass
 
     def notify(self):
+        """
+        Notify the update manager that a USB drive was inserted
+        """
         UpdateManager.input_updated(self)
 
     def poll(self, action, device):
+        """
+        Responds to a USB drive being inserted
+        :param action: action data from pyudev
+        :param device: device on which the action took place
+        """
         # A new partition was added...
         if device["ID_BUS"] == "usb":
             # .. so make sure it's a USB partition, then mount/unmount it and notify the updateManager
