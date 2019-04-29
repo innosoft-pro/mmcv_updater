@@ -26,6 +26,13 @@
             } catch (e) {
                 document.write("<span style='color:red'>Изображение не запущено.</span>");
             }
+        </script><br>
+        <b>Текущая версия: </b><script>
+        try {
+            document.write("{{current_version}}");
+        } catch(e) {
+            document.write("<span style='color:red'>Изображение не запущено.</span>");
+        }
         </script><br><br>
 
         <b>Размер нового файла: </b><span id="current_size"><script>writeBytes(0);</script></span><br>

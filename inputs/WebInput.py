@@ -63,9 +63,14 @@ class WebInput(MethodView):
         :return: template rendering data from flask
         """
         total, used, free = shutil.disk_usage("/")
-        current_image_size = UpdateManager.current_image.image_size
+        current_version = None
+        current_image_size = None
+        if UpdateManager.current_image is not None:
+            current_image_size = UpdateManager.current_image.image_size
+            version = UpdateManager.current_image.version
+            current_version = f"{version['major']}.{version['minor']}.{version['patch']}"
         return render_template("web_input.html", free_memory=free, total_memory=total,
-                               current_image_size=current_image_size)
+                               current_image_size=current_image_size, current_version=current_version)
 
     def post(self):
         """
