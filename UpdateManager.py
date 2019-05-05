@@ -120,14 +120,10 @@ else:
     # TODO: Proper image detection, not just for Docker
     docker = docker.from_env()
     containers = docker.containers.list()
-    current_version = {'major': 0, 'minor': 0, 'patch': 0}
 
     for container in containers:
         test_image = DockerImage(container.id)
         if is_newer(test_image):
-            current_version['major'] = test_image.version['major']
-            current_version['minor'] = test_image.version['minor']
-            current_version['patch'] = test_image.version['patch']
             current_image = test_image
 
     save_state()
